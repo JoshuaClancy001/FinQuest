@@ -5,18 +5,21 @@ A gamified financial education mobile app built with React Native and Expo. Lear
 ## 📱 Features
 
 ### 🎮 Gamification System
+
 - **XP & Coins**: Earn rewards for completing lessons
-- **Level System**: Progress through levels that unlock advanced financial concepts  
+- **Level System**: Progress through levels that unlock advanced financial concepts
 - **Achievement Badges**: Milestone rewards like "First $1,000 Saved" and "Beat Debt Boss"
 - **Streak Tracking**: Maintain daily learning streaks
 
 ### 📚 Interactive Learning
+
 - **Curriculum Map**: Duolingo-style learning path with visual progress
 - **5-Step Lesson Flow**: Intro → Quiz → Scenario → Reward → Recap
 - **Real-world Scenarios**: Practice financial decisions in simulated situations
 - **Progress Tracking**: Daily and weekly XP goals
 
 ### 🎯 User Experience
+
 - **Modern UI**: Clean, engaging interface with smooth animations
 - **Fixed Bottom Navigation**: Quick access to primary learning actions
 - **Progress Visualization**: Circular XP progress, level progress bars, and completion tracking
@@ -50,6 +53,7 @@ Finopoly/
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - npm or yarn
 - Expo CLI (`npm install -g @expo/cli`)
@@ -58,17 +62,20 @@ Finopoly/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/yourusername/finopoly.git
    cd finopoly
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Start the development server**
+
    ```bash
    npx expo start
    ```
@@ -81,6 +88,7 @@ Finopoly/
 ## 🎯 Current Features
 
 ### Learn Screen
+
 - **Hero Section**: Level display, coin counter, daily XP progress with circular indicator
 - **Achievements Section**: Horizontal scrolling badge collection with locked previews
 - **Curriculum Map**: Visual learning path with 5 units covering financial basics to advanced topics
@@ -88,6 +96,7 @@ Finopoly/
 - **Bottom Actions**: Fixed banner with "Continue Learning" and "Review Lessons" buttons
 
 ### Gamification Elements
+
 - **User Progress Tracking**: Level 3 user with 1,850 total XP
 - **Badge System**: 6+ achievement badges including financial milestone rewards
 - **Dual Reward System**: XP for knowledge progression, coins for purchases/upgrades
@@ -102,15 +111,7 @@ Finopoly/
 
 ## 📱 Screenshots
 
-*Screenshots will be added once the app is running on devices*
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+_Screenshots will be added once the app is running on devices_
 
 ## 📄 License
 
