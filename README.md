@@ -6,7 +6,7 @@ A gamified financial education mobile app built with React Native and Expo. Lear
 
 ### 🎮 Gamification System
 
-- **XP & Coins**: Earn rewards for completing lessons
+- **XP & Coins**: Earn rewards for completing lessons test
 - **Level System**: Progress through levels that unlock advanced financial concepts
 - **Achievement Badges**: Milestone rewards like "First $1,000 Saved" and "Beat Debt Boss"
 - **Streak Tracking**: Maintain daily learning streaks
