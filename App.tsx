@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 
 // Import screens
-import HomeScreen from './screens/HomeScreen';
-import LearnScreen from './screens/LearnScreen';
-import PortfolioScreen from './screens/PortfolioScreen';
-import WalletScreen from './screens/WalletScreen';
-import LeaderboardScreen from './screens/LeaderboardScreen';
+import HomeScreen from './screens/HomeScreen/HomeScreen'
+import LearnScreen from './screens/LearnScreen/LearnScreen';
+import PortfolioScreen from './screens/PortfolioScreen/PortfolioScreen';
+import WalletScreen from './screens/WalletScreen/WalletScreen';
+import LeaderboardScreen from './screens/LeaderboardScreen/LeaderboardScreen';
+import { UserProvider, useUser } from './contexts/UserContext';
+import { User } from './types/user';
 
 // Define the tab navigator param list
 export type RootTabParamList = {
@@ -23,7 +25,9 @@ export type RootTabParamList = {
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
 export default function App(): React.JSX.Element {
+
   return (
+    <UserProvider>
     <NavigationContainer>
       <Tab.Navigator
         screenOptions={({ route }) => ({
@@ -89,5 +93,6 @@ export default function App(): React.JSX.Element {
       </Tab.Navigator>
       <StatusBar style="auto" />
     </NavigationContainer>
+    </UserProvider>
   );
 }

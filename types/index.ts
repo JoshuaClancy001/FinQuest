@@ -49,15 +49,6 @@ export interface Achievement {
   unlockedAt?: Date;
 }
 
-// Portfolio types
-export interface PortfolioData {
-  totalValue: number;
-  dailyChange: number;
-  dailyChangeAmount: number;
-  isPositive: boolean;
-  chartData: number[];
-}
-
 // Daily Quest types
 export interface DailyQuest {
   id: number;
