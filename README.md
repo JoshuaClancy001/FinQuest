@@ -1,4 +1,4 @@
-# 🏦 Finopoly - Financial Education Game
+# 🏦 FinQuest - Financial Education Game
 
 A gamified financial education mobile app built with React Native and Expo. Learn financial concepts through interactive lessons, earn XP and coins, unlock achievement badges, and level up your financial knowledge!
 
@@ -33,57 +33,6 @@ A gamified financial education mobile app built with React Native and Expo. Lear
 - **Expo Icons** for iconography
 - **React Native Safe Area Context** for device compatibility
 
-## 📂 Project Structure
-
-```
-Finopoly/
-├── App.tsx                 # Main app component with navigation
-├── screens/
-│   └── LearnScreen.tsx     # Main learning interface
-├── styles/
-│   └── LearnScreenStyles.ts # Comprehensive styling
-├── types/
-│   └── navigation.ts       # Navigation type definitions
-├── assets/                 # Static assets
-├── app.json               # Expo configuration
-├── package.json           # Dependencies and scripts
-└── tsconfig.json          # TypeScript configuration
-```
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js (v16 or higher)
-- npm or yarn
-- Expo CLI (`npm install -g @expo/cli`)
-- iOS Simulator (for iOS development) or Android Studio (for Android development)
-
-### Installation
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/yourusername/finopoly.git
-   cd finopoly
-   ```
-
-2. **Install dependencies**
-
-   ```bash
-   npm install
-   ```
-
-3. **Start the development server**
-
-   ```bash
-   npx expo start
-   ```
-
-4. **Run on device/simulator**
-   - Press `i` for iOS simulator
-   - Press `a` for Android emulator
-   - Scan QR code with Expo Go app on physical device
 
 ## 🎯 Current Features
 
@@ -126,9 +75,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📧 Contact
 
 Josh Clancy - [your-email@example.com]
-
-Project Link: [https://github.com/yourusername/finopoly](https://github.com/yourusername/finopoly)
-
----
 
 **Made with ❤️ for financial education**
