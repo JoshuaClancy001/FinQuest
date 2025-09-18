@@ -144,21 +144,26 @@ export default function PortfolioScreenGraphs({
 
           {/* Allocation Legend */}
           <View style={styles.allocationLegend}>
-            {allocationData.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                style={styles.legendItem}
-                onPress={() => setSelectedSlice(selectedSlice === item.id ? null : item.id)}
-              >
-                <View style={[styles.legendColor, { backgroundColor: item.color }]} />
-                <View style={styles.legendText}>
-                  <Text style={styles.legendLabel}>{item.label}</Text>
-                  <Text style={styles.legendValue}>
-                    {Math.abs(item.percentage)}% (${Math.abs(item.value).toLocaleString()})
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
+            {allocationData.map((item) => {
+              if(isNaN(item.percentage)){
+                item.percentage = 0
+              }
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.legendItem}
+                  onPress={() => setSelectedSlice(selectedSlice === item.id ? null : item.id)}
+                >
+                  <View style={[styles.legendColor, { backgroundColor: item.color }]} />
+                  <View style={styles.legendText}>
+                    <Text style={styles.legendLabel}>{item.label}</Text>
+                    <Text style={styles.legendValue}>
+                      {Math.abs(item.percentage)}% (${Math.abs(item.value).toLocaleString()})
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              )
+            })}
           </View>
         </View>
 

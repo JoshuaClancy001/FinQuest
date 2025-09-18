@@ -14,6 +14,9 @@ export interface User {
     // progress
     level: number;
     lessonsCompleted: number;
+    currentLessons: {
+    [category: string]: number;
+  };
 
     // portfolio data
     portfolio: PortfolioData;

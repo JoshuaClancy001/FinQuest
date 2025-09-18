@@ -4,11 +4,13 @@ export class Lesson {
     private category: string;
     private lesson_name: string
     private questions: Question[];
+    private lessonNumber: number;
 
-    public constructor(category: string, lesson_name: string, questions: Question[]){
+    public constructor(category: string, lesson_name: string, questions: Question[],lessonNumber: number){
         this.category = category;
         this.lesson_name = lesson_name;
         this.questions = questions
+        this.lessonNumber = lessonNumber;
     }
 
     // Getters for accessing private properties
@@ -22,6 +24,9 @@ export class Lesson {
 
     public getQuestions(): Question[] {
         return this.questions;
+    }
+    public getLessonNumber(): number {
+        return this.lessonNumber;
     }
 }
 
@@ -64,7 +69,7 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["Durable", "Divisible", "Heavy and bulky", "Portable"],
                 "Heavy and bulky"
             )
-        ]),
+        ], 1),
         
         new Lesson("Financial Basics", "Understanding Income", [
             new Question(
@@ -77,7 +82,7 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["Working overtime", "Rental property income", "Freelance work", "Part-time job"],
                 "Rental property income"
             )
-        ]),
+        ], 2),
         
         new Lesson("Financial Basics", "Budgeting Basics", [
             new Question(
@@ -90,7 +95,7 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["50% wants, 30% needs, 20% savings", "50% needs, 30% wants, 20% savings", "50% savings, 30% needs, 20% wants", "All money for needs only"],
                 "50% needs, 30% wants, 20% savings"
             )
-        ])
+        ], 3)
     ],
 
     "Saving & Emergency Funds": [
@@ -105,7 +110,7 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["Stock market", "High-yield savings account", "Under your mattress", "Cryptocurrency"],
                 "High-yield savings account"
             )
-        ]),
+        ], 1),
         
         new Lesson("Saving & Emergency Funds", "Smart Savings Strategies", [
             new Question(
@@ -118,7 +123,7 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["Saving $10 daily", "Saving $300 monthly", "Saving $70 weekly", "All are the same"],
                 "All are the same"
             )
-        ]),
+        ], 2),
         
         new Lesson("Saving & Emergency Funds", "Advanced Emergency Planning", [
             new Question(
@@ -131,7 +136,7 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["Vacation opportunity", "Sale on clothes", "Job loss", "New phone release"],
                 "Job loss"
             )
-        ])
+        ], 3)
     ],
 
     "Debt Management": [
@@ -146,7 +151,7 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["Secured debt has collateral backing it", "Unsecured debt has lower interest", "No difference", "Secured debt is always smaller"],
                 "Secured debt has collateral backing it"
             )
-        ]),
+        ], 1),
         
         new Lesson("Debt Management", "Debt Payoff Strategies", [
             new Question(
@@ -159,7 +164,7 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["Pay smallest balance first", "Pay highest interest rate first", "Pay newest debt first", "Pay largest balance first"],
                 "Pay highest interest rate first"
             )
-        ]),
+        ], 2),
         
         new Lesson("Debt Management", "Credit Cards and Credit Scores", [
             new Question(
@@ -172,7 +177,7 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["90%", "50%", "Under 30%", "100%"],
                 "Under 30%"
             )
-        ])
+        ], 3)
     ],
 
     "Investing Fundamentals": [
@@ -187,7 +192,7 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["Putting all money in one stock", "Spreading investments across different assets", "Only buying expensive stocks", "Avoiding all risk"],
                 "Spreading investments across different assets"
             )
-        ]),
+        ], 1),
         
         new Lesson("Investing Fundamentals", "Stocks, Bonds, and ETFs", [
             new Question(
@@ -200,7 +205,7 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["A single stock", "Exchange Traded Fund", "Emergency Trust Fund", "European Trading Fund"],
                 "Exchange Traded Fund"
             )
-        ]),
+        ], 2),
         
         new Lesson("Investing Fundamentals", "Risk and Return", [
             new Question(
@@ -213,7 +218,7 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["Investing a large sum at once", "Investing the same amount regularly", "Only buying when prices are low", "Selling when prices drop"],
                 "Investing the same amount regularly"
             )
-        ])
+        ], 3)
     ],
 
     "Advanced Financial Planning": [
@@ -228,7 +233,7 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["Higher salary", "Compound interest over time", "Immediate access to funds", "Lower taxes today"],
                 "Compound interest over time"
             )
-        ]),
+        ], 1),
         
         new Lesson("Advanced Financial Planning", "Insurance and Protection", [
             new Question(
@@ -241,7 +246,7 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["Whole life insurance", "Health insurance", "Disability insurance", "Travel insurance"],
                 "Health insurance"
             )
-        ]),
+        ], 2),
         
         new Lesson("Advanced Financial Planning", "Tax Planning and Optimization", [
             new Question(
@@ -254,6 +259,6 @@ export const Courses: { [key: string]: Lesson[] } = {
                 ["No difference", "Tax-deferred pays taxes later, tax-free never pays taxes on growth", "Tax-free has higher fees", "Tax-deferred is only for rich people"],
                 "Tax-deferred pays taxes later, tax-free never pays taxes on growth"
             )
-        ])
+        ], 3)
     ]
 };

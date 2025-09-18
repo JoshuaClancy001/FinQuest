@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Dimensions, TouchableOpacity, Modal } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { learnScreenStyles as styles } from '../../styles/LearnScreenStyles';
+import { homeScreenStyles } from '../../styles/HomeScreenStyles';
 import { useRoute } from '@react-navigation/native';
 import { Courses, Lesson, Question } from '../../lessons';
 import { useUser } from '../../contexts/UserContext';
@@ -85,7 +86,7 @@ const LearnScreen = () => {
   const route = useRoute();
   const params = route.params as any;
 
-  const {updateCoinsAndXp, user} = useUser();
+  const {updateCoinsAndXp, user, updateCurrentLesson} = useUser();
   
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [lessonStep, setLessonStep] = useState(0); // 0: intro, 1: quiz, 2: scenario, 3: reward, 4: recap
@@ -104,6 +105,9 @@ const LearnScreen = () => {
   // Dynamic lesson state
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  
+  // Category selection modal state
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   // Check if we should resume a lesson from navigation params
   useEffect(() => {
@@ -169,7 +173,7 @@ const LearnScreen = () => {
     }
   };
 
-  const completeLesson = () => {
+  const completeLesson = (currentLessonCategory: string, currentLessonNumber: number) => {
     const xpReward = 25;
     const coinReward = 10;
     
@@ -187,6 +191,9 @@ const LearnScreen = () => {
     userProgress.dailyXP += xpReward;
     userProgress.weeklyXP += xpReward;
     userProgress.dailyLessonsCompleted += 1;
+
+    
+    updateCurrentLesson(currentLessonCategory, currentLessonNumber);
     
     setShowLessonModal(false);
   };
@@ -204,6 +211,65 @@ const LearnScreen = () => {
     setShowScenarioResult(false);
     setCurrentQuestionIndex(0);
   };
+
+  // Category selection functions
+  const handleContinueLearning = () => {
+    setShowCategoryModal(true);
+  };
+
+  const handleCategorySelect = (category: string) => {
+    setShowCategoryModal(false);
+    
+    // Get the user's current lesson progress for this category
+    const currentLessonNumber = user?.currentLessons?.[category] || 1;
+    
+    // Find the lesson to start
+    const categoryLessons = Courses[category];
+    if (categoryLessons && categoryLessons[currentLessonNumber - 1]) {
+      const lessonToStart = categoryLessons[currentLessonNumber - 1];
+      startLesson(lessonToStart);
+    } else {
+      // Fallback to first lesson if current lesson not found
+      const firstLesson = categoryLessons?.[0];
+      if (firstLesson) {
+        startLesson(firstLesson);
+      }
+    }
+  };
+
+  // Available course categories
+  const courseCategories = [
+    {
+      name: "Financial Basics",
+      icon: "school" as keyof typeof Ionicons.glyphMap,
+      color: "#007AFF",
+      description: "Learn the fundamentals of money management"
+    },
+    {
+      name: "Saving & Emergency Funds", 
+      icon: "shield-checkmark" as keyof typeof Ionicons.glyphMap,
+      color: "#34C759",
+      description: "Build your financial safety net"
+    },
+    {
+      name: "Debt Management",
+      icon: "card" as keyof typeof Ionicons.glyphMap,
+      color: "#FF6B35", 
+      description: "Master credit and debt strategies"
+    },
+    {
+      name: "Investing Fundamentals",
+      icon: "trending-up" as keyof typeof Ionicons.glyphMap,
+      color: "#AF52DE",
+      description: "Start your investment journey"
+    },
+    {
+      name: "Advanced Financial Planning",
+      icon: "analytics" as keyof typeof Ionicons.glyphMap,
+      color: "#FF9500",
+      description: "Plan for long-term financial success"
+    }
+  ];
 
   // Quiz interaction handlers for dynamic lessons
   const handleDynamicQuizAnswer = (answerIndex: number) => {
@@ -254,7 +320,7 @@ const LearnScreen = () => {
 
       </ScrollView>
 
-      <LearnScreenBottomBanner startLesson={startLesson} />
+      <LearnScreenBottomBanner onContinueLearning={handleContinueLearning} />
 
       <LearnScreenModals
         showLessonModal={showLessonModal}
@@ -279,6 +345,63 @@ const LearnScreen = () => {
         setShowLevelUp={setShowLevelUp}
         userProgress={userProgress}
       />
+
+      {/* Category Selection Modal */}
+      <Modal
+        visible={showCategoryModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowCategoryModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={homeScreenStyles.profileModal}>
+            <View style={homeScreenStyles.modalHeader}>
+              <Text style={homeScreenStyles.modalTitle}>Choose Learning Path</Text>
+              <TouchableOpacity 
+                onPress={() => setShowCategoryModal(false)}
+                style={homeScreenStyles.closeButton}
+              >
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={homeScreenStyles.modalContent} showsVerticalScrollIndicator={false}>
+              <Text style={[homeScreenStyles.modalOptionSubtitle, { marginBottom: 20, fontSize: 16, textAlign: 'center' }]}>
+                Select a financial topic to continue your learning journey
+              </Text>
+
+              {courseCategories.map((category, index) => {
+                const currentLessonNumber = user?.currentLessons?.[category.name] || 1;
+                const totalLessons = 3; // Each category has 3 lessons
+                const progressText = `Lesson ${currentLessonNumber} of ${totalLessons}`;
+                
+                return (
+                  <TouchableOpacity 
+                    key={index}
+                    style={[homeScreenStyles.modalOption, { marginBottom: 15 }]}
+                    onPress={() => handleCategorySelect(category.name)}
+                  >
+                    <View style={[homeScreenStyles.modalOptionIcon, { backgroundColor: `${category.color}20` }]}>
+                      <Ionicons name={category.icon} size={24} color={category.color} />
+                    </View>
+                    <View style={homeScreenStyles.modalOptionText}>
+                      <Text style={homeScreenStyles.modalOptionTitle}>{category.name}</Text>
+                      <Text style={homeScreenStyles.modalOptionSubtitle}>{category.description}</Text>
+                      <Text style={[homeScreenStyles.modalOptionSubtitle, { fontSize: 12, color: category.color, fontWeight: '600', marginTop: 4 }]}>
+                        {progressText}
+                      </Text>
+                    </View>
+                    <View style={{ alignItems: 'center' }}>
+                      <Ionicons name="chevron-forward" size={20} color="#666" />
+                      <Text style={{ fontSize: 10, color: '#999', marginTop: 2 }}>Continue</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };

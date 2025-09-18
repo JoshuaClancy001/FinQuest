@@ -13,7 +13,7 @@ import HomeScreenProgressCTASection from './HomeScreenProgressCTASection';
 import HomeScreenPortfolio from './HomeScreenPortfolio';
 import HomeScreenDailyChallenge from './HomeScreenDailyChallenge';
 import HomeScreenLeaderboard from './HomeScreenLeaderboard';
-import HomeScreenModals, { SimulationState, SimulationStep } from './HomeScreenModals/HomeScreenModals';
+import HomeScreenModals, { SimulationState, SimulationStep, CourseCategory } from './HomeScreenModals/HomeScreenModals';
 
 export default function HomeScreen(): React.JSX.Element {
 
@@ -29,8 +29,14 @@ const { setUser } = useUser();
       streak: 12,
       level: 8,
       lessonsCompleted: 15,
-      portfolio: new PortfolioData(1000, 1000, 1000, 1000, 1000 , 0, 0, 0, 0, 0, 0, [4800, 4950, 5000, 5050, 5200]),
-      // leaderboard fields
+      currentLessons: {
+        "Financial Basics": 3,
+        "Saving & Emergency Funds": 2,
+        "Debt Management": 1,
+        "Investing Fundamentals": 2,
+        "Advanced Financial Planning": 1
+      },
+      portfolio: new PortfolioData(0, 0, 0, 0, 0 , 0, 0, 0, 0, 0, 0, [4800, 4950, 5000, 5050, 5200]),
       avatar: '👤',
       rank: 4,
       change: '+1',
@@ -46,6 +52,7 @@ const { setUser } = useUser();
   const navigation = useNavigation();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showSimulationModal, setShowSimulationModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [simulationState, setSimulationState] = useState<SimulationState>({
     cash: 1500,
@@ -231,21 +238,58 @@ const { setUser } = useUser();
   };
 
   const handleCTAPress = () => {
-    // CTA button logic (hard-coded for now)
-    const hasUnfinishedLesson = true;
-    
-    // Navigate to Learn screen with current lesson data
-    if (hasUnfinishedLesson) {
-      (navigation as any).navigate('Learn', {
-        resumeLesson: true,
-        category: 'Financial Basics',
-        lessonIndex: 0, // "Budgeting Basics" is the 3rd lesson (index 2)
-        lessonStep: 1 // Resume from step 1 (quiz)
-      });
-    } else {
-      navigation.navigate('Learn' as never);
-    }
+    setShowCategoryModal(true);
   };
+
+  const handleCategorySelect = (category: string) => {
+    setShowCategoryModal(false);
+    
+    // Get the user's current lesson progress for this category
+    const currentLessonNumber = user?.currentLessons?.[category] || 1;
+    
+    // Navigate to Learn screen with the selected category and current lesson
+    (navigation as any).navigate('Learn', { 
+      selectedCategory: category,
+      resumeLesson: true,
+      category: category,
+      lessonIndex: currentLessonNumber - 1, // Convert to 0-based index
+      lessonStep: 0 // Start from the beginning of the lesson
+    });
+  };
+
+  // Available course categories
+  const courseCategories: CourseCategory[] = [
+    {
+      name: "Financial Basics",
+      icon: "school" as keyof typeof Ionicons.glyphMap,
+      color: "#007AFF",
+      description: "Learn the fundamentals of money management"
+    },
+    {
+      name: "Saving & Emergency Funds", 
+      icon: "shield-checkmark" as keyof typeof Ionicons.glyphMap,
+      color: "#34C759",
+      description: "Build your financial safety net"
+    },
+    {
+      name: "Debt Management",
+      icon: "card" as keyof typeof Ionicons.glyphMap,
+      color: "#FF6B35", 
+      description: "Master credit and debt strategies"
+    },
+    {
+      name: "Investing Fundamentals",
+      icon: "trending-up" as keyof typeof Ionicons.glyphMap,
+      color: "#AF52DE",
+      description: "Start your investment journey"
+    },
+    {
+      name: "Advanced Financial Planning",
+      icon: "analytics" as keyof typeof Ionicons.glyphMap,
+      color: "#FF9500",
+      description: "Plan for long-term financial success"
+    }
+  ];
 
   const handlePortfolioPress = () => {
     navigation.navigate('Portfolio' as never);
@@ -318,6 +362,11 @@ const { setUser } = useUser();
         onCloseSimulationModal={handleCloseSimulationModal}
         onSimulationStepAction={handleSimulationStepAction}
         onSimulationNextStep={handleSimulationNextStep}
+        showCategoryModal={showCategoryModal}
+        onCloseCategoryModal={() => setShowCategoryModal(false)}
+        courseCategories={courseCategories}
+        onCategorySelect={handleCategorySelect}
+        userCurrentLessons={user?.currentLessons}
       />
     </SafeAreaView>
   );

@@ -7,7 +7,8 @@ interface UserContextType {
     setUser: (user: User) => void;
     updateUser: (updates: Partial<User>) => void;
     resetUser: () => void;
-    updateCoinsAndXp: (xpAdd: number, coinAdd: number) => void;    
+    updateCoinsAndXp: (xpAdd: number, coinAdd: number) => void;
+    updateCurrentLesson: (category: string, lessonNumber: number) => void;
 }
 
 // Create a default user with PortfolioData instance matching the current hardcoded data
@@ -20,6 +21,7 @@ const createDefaultUser = (): User => ({
     streak: 12,
     level: 3,
     lessonsCompleted: 5,
+    currentLessons: {},
     portfolio: new PortfolioData(5200, 3750, 3600, 2000, 1200), // Use the original portfolio values
     avatar: "👤",
     rank: 1,
@@ -54,15 +56,24 @@ export const UserProvider =({children}:{children: ReactNode}) => {
                 cash: prev.cash + coins
             } : prev
         );
-    }, [])
+    }, []);
+
+    const updateCurrentLesson = useCallback((category: string, lessonNumber: number) => {
+        setUserState((prev) => {
+            if (!prev) return prev;
+            const updatedLessons = { ...prev.currentLessons, [category]: lessonNumber };
+            return { ...prev, currentLessons: updatedLessons };
+        });
+    }, []);
 
     const contextValue = useMemo(() => ({
         user,
         setUser,
         updateUser,
         resetUser,
-        updateCoinsAndXp
-    }), [user, setUser, updateUser, resetUser, updateCoinsAndXp]);
+        updateCoinsAndXp,
+        updateCurrentLesson
+    }), [user, setUser, updateUser, resetUser, updateCoinsAndXp, updateCurrentLesson]);
 
     return (
         <UserContext.Provider value={contextValue}>

@@ -21,8 +21,8 @@ interface LearnScreenModalsProps {
   nextQuestion: () => void;
   handleScenarioChoice: (choiceIndex: number) => void;
   handleCoinXpAwarding: () => void;
-  completeLesson: () => void;
-  
+  completeLesson: (currentLessonCategory: string, currentLessonNumber: number) => void;
+
   // Badge Modal props
   showBadgeModal: boolean;
   setShowBadgeModal: (show: boolean) => void;
@@ -236,7 +236,7 @@ const LearnScreenModals: React.FC<LearnScreenModalsProps> = ({
                 </View>
                 <TouchableOpacity 
                   style={styles.completeButton} 
-                  onPress={completeLesson}
+                  onPress={() => completeLesson(currentLesson.getCategory(), currentLesson.getLessonNumber())}
                 >
                   <Text style={styles.completeButtonText}>Complete Lesson</Text>
                 </TouchableOpacity>
