@@ -16,7 +16,7 @@ export default function PortfolioScreen(): React.JSX.Element {
   const isAndroid = Platform.OS === 'android';
 
   // Get user context
-  const { user, updateCoinsAndXp } = useUser();
+  const { user, updateCoinsAndXp, updateUser } = useUser();
 
   // Modal states
   const [showStockModal, setShowStockModal] = useState(false);
@@ -410,6 +410,7 @@ export default function PortfolioScreen(): React.JSX.Element {
           currentEvent={currentEvent}
           setShowAchievements={setShowAchievements}
           setShowMarketEvent={setShowMarketEvent}
+          updateUser={updateUser}
         />
 
         {/* Breakdown Cards Section */}

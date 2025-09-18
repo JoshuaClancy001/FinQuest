@@ -36,7 +36,7 @@ const { setUser } = useUser();
         "Investing Fundamentals": 2,
         "Advanced Financial Planning": 1
       },
-      portfolio: new PortfolioData(0, 0, 0, 0, 0 , 0, 0, 0, 0, 0, 0, [4800, 4950, 5000, 5050, 5200]),
+      portfolio: new PortfolioData(1000, 1000, 1000, 1000, 1000 , 0, 0, 0, 0, 0, 0, [4800, 4950, 5000, 5050, 5200]),
       avatar: '👤',
       rank: 4,
       change: '+1',

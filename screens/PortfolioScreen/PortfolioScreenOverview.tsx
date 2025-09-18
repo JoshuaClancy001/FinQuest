@@ -1,25 +1,12 @@
-import React from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { View, Text, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { portfolioScreenStyles as styles } from '../../styles/PortfolioScreenStyles';
+import { User } from '../../types/user';
 
 // Type definitions
-interface User {
-  streak: number;
-  portfolio: {
-    totalValue: number;
-    individualStocksValue: number;
-    etfsValue: number;
-    realEstateValue: number;
-    totalChangeIsPositive?: boolean;
-    totalDailyChangePercent?: number;
-    totalDailyChangeAmount?: number;
-    totalWeeklyChangePercent?: number;
-    totalWeeklyChangeAmount?: number;
-  };
-  cash: number;
-}
-
 interface Achievement {
   id: string;
   title: string;
@@ -55,6 +42,7 @@ interface Props {
   currentEvent: MarketEvent;
   setShowAchievements: (show: boolean) => void;
   setShowMarketEvent: (show: boolean) => void;
+  updateUser: (updates: Partial<User>) => void;
 }
 
 export default function PortfolioScreenOverview({
@@ -63,12 +51,66 @@ export default function PortfolioScreenOverview({
   leaderboardData,
   currentEvent,
   setShowAchievements,
-  setShowMarketEvent
+  setShowMarketEvent,
+  updateUser
 }: Props): React.JSX.Element {
   // Get screen dimensions for responsive sizing
   const { width: screenWidth } = Dimensions.get('window');
   const isTablet = screenWidth >= 768;
   const isAndroid = Platform.OS === 'android';
+
+  // Ref to track if we've updated portfolio for this focus session
+  const hasUpdatedThisSession = useRef(false);
+
+  // useFocusEffect to randomize daily and weekly changes each time screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      const updateDailyChanges = () => {
+        // Only update if we haven't updated this session and user exists
+        if (!hasUpdatedThisSession.current && user && user.portfolio) {
+          try {
+            // Generate random changes between -2.0 and 2.0
+            const dailyChangePercent = (Math.random() * 4 - 2); // -2.0 to 2.0
+            const weeklyChangePercent = (Math.random() * 4 - 2); // -2.0 to 2.0
+            
+            // Calculate change amounts based on portfolio value
+            const portfolioValue = user.portfolio.totalValue || 0;
+            const dailyChangeAmount = (portfolioValue * dailyChangePercent) / 100;
+            const weeklyChangeAmount = (portfolioValue * weeklyChangePercent) / 100;
+            
+            // Update portfolio properties directly
+            user.portfolio.totalDailyChangePercent = dailyChangePercent;
+            user.portfolio.totalDailyChangeAmount = dailyChangeAmount;
+            user.portfolio.totalWeeklyChangePercent = weeklyChangePercent;
+            user.portfolio.totalWeeklyChangeAmount = weeklyChangeAmount;
+            user.portfolio.totalChangeIsPositive = dailyChangePercent >= 0;
+
+            // Trigger a state update by updating user context
+            updateUser({ ...user });
+            
+            // Mark that we've updated for this session
+            hasUpdatedThisSession.current = true;
+            
+            console.log('Portfolio changes updated:', {
+              daily: `${dailyChangePercent.toFixed(2)}%`,
+              weekly: `${weeklyChangePercent.toFixed(2)}%`
+            });
+          } catch (error) {
+            console.error('Error updating daily changes:', error);
+          }
+        }
+      };
+
+      // Reset the flag when screen comes into focus
+      hasUpdatedThisSession.current = false;
+      updateDailyChanges();
+
+      // Return cleanup function to reset flag when screen loses focus
+      return () => {
+        hasUpdatedThisSession.current = false;
+      };
+    }, [])
+  );
 
   return (
     <View style={[
@@ -163,7 +205,7 @@ export default function PortfolioScreenOverview({
                 fontSize: isTablet ? 18 : 16
               }
             ]}>
-              {(user?.portfolio.totalChangeIsPositive ?? true) ? '+' : ''}{(user?.portfolio.totalDailyChangePercent ?? 0).toFixed(1)}%
+              {(user?.portfolio.totalChangeIsPositive ?? true) ? '+' : ''}{(user?.portfolio.totalDailyChangePercent ?? 0).toFixed(2)}%
             </Text>
             <Text style={[
               styles.changeAmount,
