@@ -876,6 +876,14 @@ export const learnScreenStyles = StyleSheet.create({
     color: '#1f2937',
   },
 
+  lockedLessonNode: {
+    opacity: 0.6,
+  },
+
+  lockedLessonTitle: {
+    color: '#9ca3af',
+  },
+
   lockedText: {
     color: '#9ca3af',
   },
@@ -887,6 +895,10 @@ export const learnScreenStyles = StyleSheet.create({
     backgroundColor: '#10b981',
     marginLeft: 22.5,
     marginBottom: 4,
+  },
+
+  lockedPathConnector: {
+    backgroundColor: '#d1d5db',
   },
 
   lockedConnector: {

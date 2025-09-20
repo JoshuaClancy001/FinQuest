@@ -192,8 +192,9 @@ const LearnScreen = () => {
     userProgress.weeklyXP += xpReward;
     userProgress.dailyLessonsCompleted += 1;
 
-    
-    updateCurrentLesson(currentLessonCategory, currentLessonNumber);
+    // Advance to the next lesson in this category
+    const nextLessonNumber = currentLessonNumber + 1;
+    updateCurrentLesson(currentLessonCategory, nextLessonNumber);
     
     setShowLessonModal(false);
   };
