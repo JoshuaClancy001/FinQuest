@@ -24,7 +24,7 @@ const { setUser } = useUser();
       id: "123",
       username: "Josh",
       initials: "JJC",
-      xp: 2150,
+      xp: 250,
       cash: 5750,
       streak: 12,
       level: 8,
