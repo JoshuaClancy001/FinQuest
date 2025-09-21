@@ -22,6 +22,7 @@ interface Props {
   setShowRealEstateModal: (show: boolean) => void;
   setShowETFModal: (show: boolean) => void;
   setShowCryptoModal: (show: boolean) => void;
+  setShowBondsModal: (show: boolean) => void;
 }
 
 export default function PortfolioScreenBreakdown({
@@ -29,7 +30,8 @@ export default function PortfolioScreenBreakdown({
   setShowStockModal,
   setShowRealEstateModal,
   setShowETFModal,
-  setShowCryptoModal
+  setShowCryptoModal,
+  setShowBondsModal
 }: Props): React.JSX.Element {
   // Get screen dimensions for responsive sizing
   const { width: screenWidth } = Dimensions.get('window');
@@ -47,7 +49,7 @@ export default function PortfolioScreenBreakdown({
       
       <View style={styles.cardsGrid}>
         {portfolioBreakdown.map((item) => {
-          const isClickable = item.id === 'stocks' || item.id === 'real-estate' || item.id === 'etfs' || item.id === 'crypto';
+          const isClickable = item.id === 'stocks' || item.id === 'real-estate' || item.id === 'etfs' || item.id === 'crypto' || item.id === 'bonds';
           const handlePress = () => {
             if (item.id === 'stocks') {
               setShowStockModal(true);
@@ -57,6 +59,8 @@ export default function PortfolioScreenBreakdown({
               setShowETFModal(true);
             } else if (item.id === 'crypto') {
               setShowCryptoModal(true);
+            } else if (item.id === 'bonds') {
+              setShowBondsModal(true);
             }
           };
           

@@ -68,6 +68,16 @@ interface Crypto {
   marketCap: number;
 }
 
+interface Bond {
+  symbol: string;
+  name: string;
+  price: number;
+  change: number;
+  yield: number;
+  duration: number;
+  type: string;
+}
+
 interface User {
   cash: number;
 }
@@ -81,6 +91,7 @@ interface Props {
   showRealEstateModal: boolean;
   showETFModal: boolean;
   showCryptoModal: boolean;
+  showBondsModal: boolean;
   
   // Modal state setters
   setShowActionSheet: (show: boolean) => void;
@@ -90,6 +101,7 @@ interface Props {
   setShowRealEstateModal: (show: boolean) => void;
   setShowETFModal: (show: boolean) => void;
   setShowCryptoModal: (show: boolean) => void;
+  setShowBondsModal: (show: boolean) => void;
   
   // Data
   achievements: Achievement[];
@@ -99,6 +111,7 @@ interface Props {
   fakeRealEstate: RealEstate[];
   fakeETFs: ETF[];
   fakeCrypto: Crypto[];
+  fakeBonds: Bond[];
   user: User | null;
   
   // Stock trading states
@@ -128,6 +141,13 @@ interface Props {
   cryptoTradeAmount: string;
   setCryptoTradeType: (type: 'buy' | 'sell') => void;
   setCryptoTradeAmount: (amount: string) => void;
+
+  // Bonds trading states
+  selectedBond: Bond | null;
+  bondsTradeType: 'buy' | 'sell';
+  bondsTradeAmount: string;
+  setBondsTradeType: (type: 'buy' | 'sell') => void;
+  setBondsTradeAmount: (amount: string) => void;
   
   // Handlers
   handleStockSelect: (stock: Stock) => void;
@@ -138,6 +158,8 @@ interface Props {
   handleETFTrade: () => void;
   handleCryptoSelect: (crypto: Crypto) => void;
   handleCryptoTrade: () => void;
+  handleBondSelect: (bond: Bond) => void;
+  handleBondTrade: () => void;
 }
 
 export default function PortfolioScreenModals({
@@ -148,6 +170,7 @@ export default function PortfolioScreenModals({
   showRealEstateModal,
   showETFModal,
   showCryptoModal,
+  showBondsModal,
   setShowActionSheet,
   setShowAchievements,
   setShowMarketEvent,
@@ -155,6 +178,7 @@ export default function PortfolioScreenModals({
   setShowRealEstateModal,
   setShowETFModal,
   setShowCryptoModal,
+  setShowBondsModal,
   achievements,
   currentEvent,
   portfolioActions,
@@ -162,6 +186,7 @@ export default function PortfolioScreenModals({
   fakeRealEstate,
   fakeETFs,
   fakeCrypto,
+  fakeBonds,
   user,
   selectedStock,
   tradeType,
@@ -183,6 +208,11 @@ export default function PortfolioScreenModals({
   cryptoTradeAmount,
   setCryptoTradeType,
   setCryptoTradeAmount,
+  selectedBond,
+  bondsTradeType,
+  bondsTradeAmount,
+  setBondsTradeType,
+  setBondsTradeAmount,
   handleStockSelect,
   handleTrade,
   handleRealEstateSelect,
@@ -190,7 +220,9 @@ export default function PortfolioScreenModals({
   handleETFSelect,
   handleETFTrade,
   handleCryptoSelect,
-  handleCryptoTrade
+  handleCryptoTrade,
+  handleBondSelect,
+  handleBondTrade
 }: Props): React.JSX.Element {
   return (
     <>
@@ -791,6 +823,108 @@ export default function PortfolioScreenModals({
                 >
                   <Text style={styles.tradeButtonText}>
                     {cryptoTradeType === 'buy' ? 'Buy' : 'Sell'} {selectedCrypto.symbol}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Bonds Trading Modal */}
+      <Modal
+        visible={showBondsModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowBondsModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Bonds & Treasury</Text>
+              <TouchableOpacity onPress={() => setShowBondsModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.tradingToggle}>
+              <TouchableOpacity
+                style={[styles.toggleButton, bondsTradeType === 'buy' && styles.toggleButtonActive]}
+                onPress={() => setBondsTradeType('buy')}
+              >
+                <Text style={[styles.toggleText, bondsTradeType === 'buy' && styles.toggleTextActive]}>
+                  Buy
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.toggleButton, bondsTradeType === 'sell' && styles.toggleButtonActive]}
+                onPress={() => setBondsTradeType('sell')}
+              >
+                <Text style={[styles.toggleText, bondsTradeType === 'sell' && styles.toggleTextActive]}>
+                  Sell
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.cashBalance}>Cash: ${user?.cash.toLocaleString()}</Text>
+
+            <ScrollView style={styles.stocksList}>
+              {fakeBonds.map((bond) => (
+                <TouchableOpacity
+                  key={bond.symbol}
+                  style={[
+                    styles.stockItem,
+                    selectedBond?.symbol === bond.symbol && styles.stockItemSelected
+                  ]}
+                  onPress={() => handleBondSelect(bond)}
+                >
+                  <View style={styles.stockInfo}>
+                    <Text style={styles.stockSymbol}>{bond.symbol}</Text>
+                    <Text style={styles.stockName}>{bond.name}</Text>
+                    <Text style={styles.stockName}>{bond.type}</Text>
+                  </View>
+                  <View style={styles.stockPriceContainer}>
+                    <Text style={styles.stockPrice}>${bond.price.toFixed(2)}</Text>
+                    <Text style={styles.stockChange}>{bond.yield.toFixed(2)}% Yield</Text>
+                    <Text style={[
+                      styles.stockChange,
+                      { color: bond.change >= 0 ? '#34C759' : '#FF3B30' }
+                    ]}>
+                      {bond.change >= 0 ? '+' : ''}{bond.change.toFixed(2)}%
+                    </Text>
+                    <Text style={styles.stockChange}>Duration: {bond.duration}Y</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            {selectedBond && (
+              <View style={styles.tradeForm}>
+                <Text style={styles.selectedStockText}>
+                  {bondsTradeType === 'buy' ? 'Buying' : 'Selling'} {selectedBond.symbol}
+                </Text>
+                <Text style={styles.stockPriceText}>
+                  Price: ${selectedBond.price.toFixed(2)} • Yield: {selectedBond.yield.toFixed(2)}% • Duration: {selectedBond.duration}Y
+                </Text>
+
+                <TextInput
+                  style={styles.shareInput}
+                  placeholder={`Number of ${selectedBond.symbol} bonds to ${bondsTradeType}...`}
+                  placeholderTextColor="#999"
+                  value={bondsTradeAmount}
+                  onChangeText={setBondsTradeAmount}
+                  keyboardType="numeric"
+                />
+
+                <TouchableOpacity
+                  style={[
+                    styles.tradeButton,
+                    { backgroundColor: bondsTradeType === 'buy' ? '#34C759' : '#FF3B30' }
+                  ]}
+                  onPress={handleBondTrade}
+                >
+                  <Text style={styles.tradeButtonText}>
+                    {bondsTradeType === 'buy' ? 'Buy' : 'Sell'} {selectedBond.symbol}
                   </Text>
                 </TouchableOpacity>
               </View>

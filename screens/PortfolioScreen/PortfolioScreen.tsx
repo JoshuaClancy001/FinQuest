@@ -42,6 +42,12 @@ export default function PortfolioScreen(): React.JSX.Element {
   const [cryptoTradeType, setCryptoTradeType] = useState<'buy' | 'sell'>('buy');
   const [cryptoTradeAmount, setCryptoTradeAmount] = useState('');
 
+  // Bonds modal states
+  const [showBondsModal, setShowBondsModal] = useState(false);
+  const [selectedBond, setSelectedBond] = useState<typeof fakeBonds[0] | null>(null);
+  const [bondsTradeType, setBondsTradeType] = useState<'buy' | 'sell'>('buy');
+  const [bondsTradeAmount, setBondsTradeAmount] = useState('');
+
   // Mock stock data for trading
   const fakeStocks = [
     { symbol: 'NIMB', name: 'Nimbus Innovations', price: 45.32, change: 2.4 },
@@ -76,6 +82,14 @@ export default function PortfolioScreen(): React.JSX.Element {
     { symbol: 'ADA', name: 'Cardano', price: 0.89, change: 1.67, type: 'Proof of Stake', marketCap: 29.4 },
     { symbol: 'SOL', name: 'Solana', price: 134.56, change: -6.78, type: 'High Performance', marketCap: 58.9 },
     { symbol: 'DOT', name: 'Polkadot', price: 12.45, change: 2.34, type: 'Interoperability', marketCap: 15.2 },
+  ];
+
+  const fakeBonds = [
+    { symbol: 'US10Y', name: 'US 10-Year Treasury', price: 97.25, change: 0.15, yield: 4.32, duration: 8.5, type: 'Government' },
+    { symbol: 'US30Y', name: 'US 30-Year Treasury', price: 94.78, change: -0.23, yield: 4.58, duration: 20.1, type: 'Government' },
+    { symbol: 'AAPL', name: 'Apple Inc. Corporate Bond', price: 101.45, change: 0.08, yield: 3.75, duration: 5.2, type: 'Corporate' },
+    { symbol: 'MSFT', name: 'Microsoft Corporate Bond', price: 99.87, change: -0.12, yield: 3.92, duration: 7.3, type: 'Corporate' },
+    { symbol: 'NYC', name: 'NYC Municipal Bond', price: 102.13, change: 0.25, yield: 3.15, duration: 12.4, type: 'Municipal' },
   ];
 
   // Debug: Log the current user portfolio values
@@ -442,6 +456,52 @@ export default function PortfolioScreen(): React.JSX.Element {
     setCryptoTradeAmount('');
   };
 
+  const handleBondSelect = (bond: typeof fakeBonds[0]) => {
+    setSelectedBond(bond);
+    setShowBondsModal(true);
+  };
+
+  const handleBondTrade = () => {
+    if (!selectedBond || !bondsTradeAmount || !user) {
+      Alert.alert('Error', 'Please enter a valid amount');
+      return;
+    }
+
+    const amount = parseFloat(bondsTradeAmount);
+    const totalCost = amount * selectedBond.price;
+
+    if (bondsTradeType === 'buy') {
+      if (user.cash < totalCost) {
+        Alert.alert('Insufficient Funds', `You need $${totalCost.toFixed(2)} to buy ${amount} ${selectedBond.symbol} bonds`);
+        return;
+      }
+      // Deduct cash and award XP for making investment
+      updateCoinsAndXp(8, -totalCost); // Lower XP for bonds (safer investment)
+      
+      // Update the user's portfolio bonds value
+      const newBondsValue = user.portfolio.bondsValue + totalCost;
+      user.portfolio.updateBondsValue(newBondsValue);
+      
+      Alert.alert('Success!', `Bought ${amount} ${selectedBond.symbol} bonds for $${totalCost.toFixed(2)}`, [
+        { text: 'OK', onPress: () => setShowBondsModal(false) }
+      ]);
+    } else {
+      // For selling, we'll assume they have the bonds (simplified)
+      const sellValue = totalCost * 0.995; // 0.5% trading fee (lower for bonds)
+      updateCoinsAndXp(5, sellValue);
+      
+      // Update the user's portfolio bonds value (reduce by sell amount)
+      const newBondsValue = Math.max(0, user.portfolio.bondsValue - totalCost);
+      user.portfolio.updateBondsValue(newBondsValue);
+      
+      Alert.alert('Success!', `Sold ${amount} ${selectedBond.symbol} bonds for $${sellValue.toFixed(2)}`, [
+        { text: 'OK', onPress: () => setShowBondsModal(false) }
+      ]);
+    }
+
+    setBondsTradeAmount('');
+  };
+
   // Achievements data
   const achievements = [
     {
@@ -606,6 +666,7 @@ export default function PortfolioScreen(): React.JSX.Element {
           setShowRealEstateModal={setShowRealEstateModal}
           setShowETFModal={setShowETFModal}
           setShowCryptoModal={setShowCryptoModal}
+          setShowBondsModal={setShowBondsModal}
         />
 
         {/* Interactive Graphs Section */}
@@ -641,6 +702,7 @@ export default function PortfolioScreen(): React.JSX.Element {
         showRealEstateModal={showRealEstateModal}
         showETFModal={showETFModal}
         showCryptoModal={showCryptoModal}
+        showBondsModal={showBondsModal}
         setShowActionSheet={setShowActionSheet}
         setShowAchievements={setShowAchievements}
         setShowMarketEvent={setShowMarketEvent}
@@ -648,6 +710,7 @@ export default function PortfolioScreen(): React.JSX.Element {
         setShowRealEstateModal={setShowRealEstateModal}
         setShowETFModal={setShowETFModal}
         setShowCryptoModal={setShowCryptoModal}
+        setShowBondsModal={setShowBondsModal}
         achievements={achievements}
         currentEvent={currentEvent}
         portfolioActions={portfolioActions}
@@ -655,6 +718,7 @@ export default function PortfolioScreen(): React.JSX.Element {
         fakeRealEstate={fakeRealEstate}
         fakeETFs={fakeETFs}
         fakeCrypto={fakeCrypto}
+        fakeBonds={fakeBonds}
         user={user}
         selectedStock={selectedStock}
         tradeType={tradeType}
@@ -676,6 +740,11 @@ export default function PortfolioScreen(): React.JSX.Element {
         cryptoTradeAmount={cryptoTradeAmount}
         setCryptoTradeType={setCryptoTradeType}
         setCryptoTradeAmount={setCryptoTradeAmount}
+        selectedBond={selectedBond}
+        bondsTradeType={bondsTradeType}
+        bondsTradeAmount={bondsTradeAmount}
+        setBondsTradeType={setBondsTradeType}
+        setBondsTradeAmount={setBondsTradeAmount}
         handleStockSelect={handleStockSelect}
         handleTrade={handleTrade}
         handleRealEstateSelect={handleRealEstateSelect}
@@ -684,6 +753,8 @@ export default function PortfolioScreen(): React.JSX.Element {
         handleETFTrade={handleETFTrade}
         handleCryptoSelect={handleCryptoSelect}
         handleCryptoTrade={handleCryptoTrade}
+        handleBondSelect={handleBondSelect}
+        handleBondTrade={handleBondTrade}
       />
     </SafeAreaView>
   );
