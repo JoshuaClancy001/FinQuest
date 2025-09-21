@@ -19,11 +19,15 @@ interface PortfolioBreakdownItem {
 interface Props {
   portfolioBreakdown: PortfolioBreakdownItem[];
   setShowStockModal: (show: boolean) => void;
+  setShowRealEstateModal: (show: boolean) => void;
+  setShowETFModal: (show: boolean) => void;
 }
 
 export default function PortfolioScreenBreakdown({
   portfolioBreakdown,
-  setShowStockModal
+  setShowStockModal,
+  setShowRealEstateModal,
+  setShowETFModal
 }: Props): React.JSX.Element {
   // Get screen dimensions for responsive sizing
   const { width: screenWidth } = Dimensions.get('window');
@@ -41,13 +45,74 @@ export default function PortfolioScreenBreakdown({
       
       <View style={styles.cardsGrid}>
         {portfolioBreakdown.map((item) => {
-          const CardWrapper = item.id === 'stocks' ? TouchableOpacity : View;
-          const cardProps = item.id === 'stocks' ? { onPress: () => setShowStockModal(true) } : {};
+          const isClickable = item.id === 'stocks' || item.id === 'real-estate' || item.id === 'etfs';
+          const handlePress = () => {
+            if (item.id === 'stocks') {
+              setShowStockModal(true);
+            } else if (item.id === 'real-estate') {
+              setShowRealEstateModal(true);
+            } else if (item.id === 'etfs') {
+              setShowETFModal(true);
+            }
+          };
           
-          return (
-            <CardWrapper 
+          const cardContent = (
+            <View style={styles.cardHeader}>
+              <View style={[styles.cardIconContainer, { backgroundColor: item.color }]}>
+                <Ionicons 
+                  name={item.icon as any} 
+                  size={isTablet ? 24 : 20} 
+                  color="#fff" 
+                />
+              </View>
+              <View style={styles.cardHeaderText}>
+                <Text style={[styles.cardTitle, { fontSize: isTablet ? 18 : 16 }]}>
+                  {item.title}
+                </Text>
+                <Text style={[styles.cardDescription, { fontSize: isTablet ? 14 : 12 }]}>
+                  {item.description}
+                </Text>
+              </View>
+            </View>
+          );
+          
+          const cardValue = (
+            <View style={styles.cardContent}>
+              <Text style={[
+                styles.cardValue, 
+                { 
+                  color: item.type === 'debt' ? item.color : '#1a1a1a',
+                  fontSize: isTablet ? 28 : 24
+                }
+              ]}>
+                {item.value < 0 ? '-' : ''}${Math.abs(item.value).toLocaleString()}
+              </Text>
+              
+              {item.change !== 0 && (
+                <View style={styles.cardChangeContainer}>
+                  <Ionicons 
+                    name={item.change > 0 ? "arrow-up" : "arrow-down"} 
+                    size={isTablet ? 16 : 14} 
+                    color={item.change > 0 ? "#34C759" : "#FF3B30"} 
+                  />
+                  <Text style={[
+                    styles.cardChange,
+                    { 
+                      color: item.change > 0 ? "#34C759" : "#FF3B30",
+                      fontSize: isTablet ? 14 : 12
+                    }
+                  ]}>
+                    {item.change > 0 ? '+' : ''}{item.change}%
+                  </Text>
+                </View>
+              )}
+            </View>
+          );
+
+          return isClickable ? (
+            <TouchableOpacity
               key={item.id}
-              {...cardProps}
+              onPress={handlePress}
               style={[
                 styles.breakdownCard,
                 { 
@@ -59,55 +124,26 @@ export default function PortfolioScreenBreakdown({
                 }
               ]}
             >
-              <View style={styles.cardHeader}>
-                <View style={[styles.cardIconContainer, { backgroundColor: item.color }]}>
-                  <Ionicons 
-                    name={item.icon as any} 
-                    size={isTablet ? 24 : 20} 
-                    color="#fff" 
-                  />
-                </View>
-                <View style={styles.cardHeaderText}>
-                  <Text style={[styles.cardTitle, { fontSize: isTablet ? 18 : 16 }]}>
-                    {item.title}
-                  </Text>
-                  <Text style={[styles.cardDescription, { fontSize: isTablet ? 14 : 12 }]}>
-                    {item.description}
-                  </Text>
-                </View>
-              </View>
-              
-              <View style={styles.cardContent}>
-                <Text style={[
-                  styles.cardValue, 
-                  { 
-                    color: item.type === 'debt' ? item.color : '#1a1a1a',
-                    fontSize: isTablet ? 28 : 24
-                  }
-                ]}>
-                  {item.value < 0 ? '-' : ''}${Math.abs(item.value).toLocaleString()}
-                </Text>
-                
-                {item.change !== 0 && (
-                  <View style={styles.cardChangeContainer}>
-                    <Ionicons 
-                      name={item.change > 0 ? "arrow-up" : "arrow-down"} 
-                      size={isTablet ? 16 : 14} 
-                      color={item.change > 0 ? "#34C759" : "#FF3B30"} 
-                    />
-                    <Text style={[
-                      styles.cardChange,
-                      { 
-                        color: item.change > 0 ? "#34C759" : "#FF3B30",
-                        fontSize: isTablet ? 14 : 12
-                      }
-                    ]}>
-                      {item.change > 0 ? '+' : ''}{item.change}%
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </CardWrapper>
+              {cardContent}
+              {cardValue}
+            </TouchableOpacity>
+          ) : (
+            <View
+              key={item.id}
+              style={[
+                styles.breakdownCard,
+                { 
+                  backgroundColor: isAndroid ? '#fff' : item.backgroundColor,
+                  borderColor: isAndroid ? 'transparent' : item.color,
+                  borderWidth: isAndroid ? 0 : 1,
+                  width: isTablet ? '48%' : '100%',
+                  marginBottom: isTablet ? 16 : 12
+                }
+              ]}
+            >
+              {cardContent}
+              {cardValue}
+            </View>
           );
         })}
       </View>

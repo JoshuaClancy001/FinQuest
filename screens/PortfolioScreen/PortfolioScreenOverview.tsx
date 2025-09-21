@@ -272,38 +272,6 @@ export default function PortfolioScreenOverview({
           {currentEvent.description}
         </Text>
       </TouchableOpacity>
-
-      {/* Leaderboard Teaser */}
-      <View style={styles.leaderboardTeaser}>
-        <View style={styles.leaderboardHeader}>
-          <Text style={styles.leaderboardTitle}>Global Rankings</Text>
-          <TouchableOpacity>
-            <Text style={styles.viewAllText}>View All</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.leaderboardList}>
-          {leaderboardData.slice(0, 3).map((player) => (
-            <View 
-              key={player.rank} 
-              style={[
-                styles.leaderboardItem,
-                player.you && styles.leaderboardItemHighlight
-              ]}
-            >
-              <Text style={styles.playerRank}>#{player.rank}</Text>
-              <Text style={[
-                styles.playerName,
-                player.you && styles.playerNameHighlight
-              ]}>
-                {player.name}
-              </Text>
-              <Text style={styles.playerNetWorth}>
-                ${player.netWorth.toLocaleString()}
-              </Text>
-            </View>
-          ))}
-        </View>
-      </View>
     </View>
   );
 }

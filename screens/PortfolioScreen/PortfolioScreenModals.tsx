@@ -41,6 +41,24 @@ interface Stock {
   change: number;
 }
 
+interface RealEstate {
+  symbol: string;
+  name: string;
+  price: number;
+  change: number;
+  type: string;
+  yield: number;
+}
+
+interface ETF {
+  symbol: string;
+  name: string;
+  price: number;
+  change: number;
+  type: string;
+  expenseRatio: number;
+}
+
 interface User {
   cash: number;
 }
@@ -51,18 +69,24 @@ interface Props {
   showAchievements: boolean;
   showMarketEvent: boolean;
   showStockModal: boolean;
+  showRealEstateModal: boolean;
+  showETFModal: boolean;
   
   // Modal state setters
   setShowActionSheet: (show: boolean) => void;
   setShowAchievements: (show: boolean) => void;
   setShowMarketEvent: (show: boolean) => void;
   setShowStockModal: (show: boolean) => void;
+  setShowRealEstateModal: (show: boolean) => void;
+  setShowETFModal: (show: boolean) => void;
   
   // Data
   achievements: Achievement[];
   currentEvent: MarketEvent;
   portfolioActions: PortfolioAction[];
   fakeStocks: Stock[];
+  fakeRealEstate: RealEstate[];
+  fakeETFs: ETF[];
   user: User | null;
   
   // Stock trading states
@@ -72,9 +96,27 @@ interface Props {
   setTradeType: (type: 'buy' | 'sell') => void;
   setTradeAmount: (amount: string) => void;
   
+  // Real estate trading states
+  selectedRealEstate: RealEstate | null;
+  realEstateTradeType: 'buy' | 'sell';
+  realEstateTradeAmount: string;
+  setRealEstateTradeType: (type: 'buy' | 'sell') => void;
+  setRealEstateTradeAmount: (amount: string) => void;
+
+  // ETF trading states
+  selectedETF: ETF | null;
+  etfTradeType: 'buy' | 'sell';
+  etfTradeAmount: string;
+  setETFTradeType: (type: 'buy' | 'sell') => void;
+  setETFTradeAmount: (amount: string) => void;
+  
   // Handlers
   handleStockSelect: (stock: Stock) => void;
   handleTrade: () => void;
+  handleRealEstateSelect: (property: RealEstate) => void;
+  handleRealEstateTrade: () => void;
+  handleETFSelect: (etf: ETF) => void;
+  handleETFTrade: () => void;
 }
 
 export default function PortfolioScreenModals({
@@ -82,22 +124,42 @@ export default function PortfolioScreenModals({
   showAchievements,
   showMarketEvent,
   showStockModal,
+  showRealEstateModal,
+  showETFModal,
   setShowActionSheet,
   setShowAchievements,
   setShowMarketEvent,
   setShowStockModal,
+  setShowRealEstateModal,
+  setShowETFModal,
   achievements,
   currentEvent,
   portfolioActions,
   fakeStocks,
+  fakeRealEstate,
+  fakeETFs,
   user,
   selectedStock,
   tradeType,
   tradeAmount,
   setTradeType,
   setTradeAmount,
+  selectedRealEstate,
+  realEstateTradeType,
+  realEstateTradeAmount,
+  setRealEstateTradeType,
+  setRealEstateTradeAmount,
+  selectedETF,
+  etfTradeType,
+  etfTradeAmount,
+  setETFTradeType,
+  setETFTradeAmount,
   handleStockSelect,
-  handleTrade
+  handleTrade,
+  handleRealEstateSelect,
+  handleRealEstateTrade,
+  handleETFSelect,
+  handleETFTrade
 }: Props): React.JSX.Element {
   return (
     <>
@@ -377,6 +439,220 @@ export default function PortfolioScreenModals({
                 >
                   <Text style={styles.tradeButtonText}>
                     {tradeType === 'buy' ? 'Buy' : 'Sell'} Shares
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Real Estate Trading Modal */}
+      <Modal
+        visible={showRealEstateModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowRealEstateModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Real Estate Trading</Text>
+              <TouchableOpacity onPress={() => setShowRealEstateModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.tradingToggle}>
+              <TouchableOpacity
+                style={[styles.toggleButton, realEstateTradeType === 'buy' && styles.toggleButtonActive]}
+                onPress={() => setRealEstateTradeType('buy')}
+              >
+                <Text style={[styles.toggleText, realEstateTradeType === 'buy' && styles.toggleTextActive]}>
+                  Buy
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.toggleButton, realEstateTradeType === 'sell' && styles.toggleButtonActive]}
+                onPress={() => setRealEstateTradeType('sell')}
+              >
+                <Text style={[styles.toggleText, realEstateTradeType === 'sell' && styles.toggleTextActive]}>
+                  Sell
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.cashBalance}>Cash: ${user?.cash.toLocaleString()}</Text>
+
+            <ScrollView style={styles.stocksList}>
+              {fakeRealEstate.map((property) => (
+                <TouchableOpacity
+                  key={property.symbol}
+                  style={[
+                    styles.stockItem,
+                    selectedRealEstate?.symbol === property.symbol && styles.stockItemSelected
+                  ]}
+                  onPress={() => handleRealEstateSelect(property)}
+                >
+                  <View style={styles.stockInfo}>
+                    <Text style={styles.stockSymbol}>{property.symbol}</Text>
+                    <Text style={styles.stockName}>{property.name}</Text>
+                    <Text style={styles.stockName}>{property.type}</Text>
+                  </View>
+                  <View style={styles.stockPriceContainer}>
+                    <Text style={styles.stockPrice}>${property.price.toFixed(2)}</Text>
+                    <Text style={[
+                      styles.stockChange,
+                      { color: property.change >= 0 ? '#34C759' : '#FF3B30' }
+                    ]}>
+                      {property.change >= 0 ? '+' : ''}{property.change.toFixed(2)}%
+                    </Text>
+                    <Text style={styles.stockChange}>Yield: {property.yield}%</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            {selectedRealEstate && (
+              <View style={styles.tradeForm}>
+                <Text style={styles.selectedStockText}>
+                  {realEstateTradeType === 'buy' ? 'Buying' : 'Selling'} {selectedRealEstate.symbol}
+                </Text>
+                <Text style={styles.stockPriceText}>
+                  Price: ${selectedRealEstate.price.toFixed(2)}
+                </Text>
+                
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Shares:</Text>
+                  <TextInput
+                    style={styles.shareInput}
+                    value={realEstateTradeAmount}
+                    onChangeText={setRealEstateTradeAmount}
+                    placeholder="0"
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <Text style={styles.totalCost}>
+                  Total: ${(parseFloat(realEstateTradeAmount) * selectedRealEstate.price || 0).toLocaleString()}
+                </Text>
+
+                <TouchableOpacity
+                  style={[
+                    styles.tradeButton,
+                    { backgroundColor: realEstateTradeType === 'buy' ? '#34C759' : '#FF3B30' }
+                  ]}
+                  onPress={handleRealEstateTrade}
+                >
+                  <Text style={styles.tradeButtonText}>
+                    {realEstateTradeType === 'buy' ? 'Buy' : 'Sell'} Shares
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* ETF Trading Modal */}
+      <Modal
+        visible={showETFModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowETFModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>ETF Trading</Text>
+              <TouchableOpacity onPress={() => setShowETFModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.tradingToggle}>
+              <TouchableOpacity
+                style={[styles.toggleButton, etfTradeType === 'buy' && styles.toggleButtonActive]}
+                onPress={() => setETFTradeType('buy')}
+              >
+                <Text style={[styles.toggleText, etfTradeType === 'buy' && styles.toggleTextActive]}>
+                  Buy
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.toggleButton, etfTradeType === 'sell' && styles.toggleButtonActive]}
+                onPress={() => setETFTradeType('sell')}
+              >
+                <Text style={[styles.toggleText, etfTradeType === 'sell' && styles.toggleTextActive]}>
+                  Sell
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.cashBalance}>Cash: ${user?.cash.toLocaleString()}</Text>
+
+            <ScrollView style={styles.stocksList}>
+              {fakeETFs.map((etf) => (
+                <TouchableOpacity
+                  key={etf.symbol}
+                  style={[
+                    styles.stockItem,
+                    selectedETF?.symbol === etf.symbol && styles.stockItemSelected
+                  ]}
+                  onPress={() => handleETFSelect(etf)}
+                >
+                  <View style={styles.stockInfo}>
+                    <Text style={styles.stockSymbol}>{etf.symbol}</Text>
+                    <Text style={styles.stockName}>{etf.name}</Text>
+                    <Text style={styles.stockName}>{etf.type}</Text>
+                  </View>
+                  <View style={styles.stockPriceContainer}>
+                    <Text style={styles.stockPrice}>${etf.price.toFixed(2)}</Text>
+                    <Text style={[
+                      styles.stockChange,
+                      { color: etf.change >= 0 ? '#34C759' : '#FF3B30' }
+                    ]}>
+                      {etf.change >= 0 ? '+' : ''}{etf.change.toFixed(2)}%
+                    </Text>
+                    <Text style={styles.stockChange}>Expense: {etf.expenseRatio}%</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            {selectedETF && (
+              <View style={styles.tradeForm}>
+                <Text style={styles.selectedStockText}>
+                  {etfTradeType === 'buy' ? 'Buying' : 'Selling'} {selectedETF.symbol}
+                </Text>
+                <Text style={styles.stockPriceText}>
+                  Price: ${selectedETF.price.toFixed(2)}
+                </Text>
+                
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Shares:</Text>
+                  <TextInput
+                    style={styles.shareInput}
+                    value={etfTradeAmount}
+                    onChangeText={setETFTradeAmount}
+                    placeholder="0"
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <Text style={styles.totalCost}>
+                  Total: ${(parseFloat(etfTradeAmount) * selectedETF.price || 0).toLocaleString()}
+                </Text>
+
+                <TouchableOpacity
+                  style={[
+                    styles.tradeButton,
+                    { backgroundColor: etfTradeType === 'buy' ? '#34C759' : '#FF3B30' }
+                  ]}
+                  onPress={handleETFTrade}
+                >
+                  <Text style={styles.tradeButtonText}>
+                    {etfTradeType === 'buy' ? 'Buy' : 'Sell'} Shares
                   </Text>
                 </TouchableOpacity>
               </View>

@@ -24,6 +24,18 @@ export default function PortfolioScreen(): React.JSX.Element {
   const [tradeType, setTradeType] = useState<'buy' | 'sell'>('buy');
   const [tradeAmount, setTradeAmount] = useState('');
 
+  // Real estate modal states
+  const [showRealEstateModal, setShowRealEstateModal] = useState(false);
+  const [selectedRealEstate, setSelectedRealEstate] = useState<typeof fakeRealEstate[0] | null>(null);
+  const [realEstateTradeType, setRealEstateTradeType] = useState<'buy' | 'sell'>('buy');
+  const [realEstateTradeAmount, setRealEstateTradeAmount] = useState('');
+
+  // ETF modal states
+  const [showETFModal, setShowETFModal] = useState(false);
+  const [selectedETF, setSelectedETF] = useState<typeof fakeETFs[0] | null>(null);
+  const [etfTradeType, setETFTradeType] = useState<'buy' | 'sell'>('buy');
+  const [etfTradeAmount, setETFTradeAmount] = useState('');
+
   // Mock stock data for trading
   const fakeStocks = [
     { symbol: 'NIMB', name: 'Nimbus Innovations', price: 45.32, change: 2.4 },
@@ -31,6 +43,24 @@ export default function PortfolioScreen(): React.JSX.Element {
     { symbol: 'CRWN', name: 'Crown Dynamics', price: 89.45, change: 0.8 },
     { symbol: 'HRZN', name: 'Horizon Systems', price: 234.12, change: -3.1 },
     { symbol: 'VYGR', name: 'Voyager Corp', price: 67.89, change: 1.9 },
+  ];
+
+  // Mock real estate data for trading
+  const fakeRealEstate = [
+    { symbol: 'SPG', name: 'Simon Property Group', price: 124.56, change: 1.23, type: 'Mall REIT', yield: 5.2 },
+    { symbol: 'PLD', name: 'Prologis Inc.', price: 134.89, change: -0.45, type: 'Industrial REIT', yield: 3.1 },
+    { symbol: 'AMT', name: 'American Tower Corp.', price: 198.23, change: 2.34, type: 'Cell Tower REIT', yield: 3.4 },
+    { symbol: 'CCI', name: 'Crown Castle Inc.', price: 89.45, change: -1.12, type: 'Cell Tower REIT', yield: 6.8 },
+    { symbol: 'EQIX', name: 'Equinix Inc.', price: 756.78, change: 8.90, type: 'Data Center REIT', yield: 1.9 },
+  ];
+
+  // Mock ETF data for trading
+  const fakeETFs = [
+    { symbol: 'SPY', name: 'SPDR S&P 500 ETF Trust', price: 521.34, change: 1.23, type: 'Large Cap Blend', expenseRatio: 0.09 },
+    { symbol: 'QQQ', name: 'Invesco QQQ Trust', price: 456.78, change: -0.89, type: 'Large Cap Growth', expenseRatio: 0.20 },
+    { symbol: 'VTI', name: 'Vanguard Total Stock Market', price: 243.67, change: 0.95, type: 'Total Stock Market', expenseRatio: 0.03 },
+    { symbol: 'VXUS', name: 'Vanguard Total International', price: 67.89, change: -1.45, type: 'International', expenseRatio: 0.08 },
+    { symbol: 'BND', name: 'Vanguard Total Bond Market', price: 72.34, change: 0.12, type: 'Total Bond Market', expenseRatio: 0.03 },
   ];
 
   // Debug: Log the current user portfolio values
@@ -256,6 +286,100 @@ export default function PortfolioScreen(): React.JSX.Element {
     setTradeAmount('');
   };
 
+  // Real estate trading handlers
+  const handleRealEstateSelect = (property: typeof fakeRealEstate[0]) => {
+    setSelectedRealEstate(property);
+    setShowRealEstateModal(true);
+  };
+
+  const handleRealEstateTrade = () => {
+    if (!selectedRealEstate || !realEstateTradeAmount || !user) {
+      Alert.alert('Error', 'Please enter a valid amount');
+      return;
+    }
+
+    const amount = parseFloat(realEstateTradeAmount);
+    const totalCost = amount * selectedRealEstate.price;
+
+    if (realEstateTradeType === 'buy') {
+      if (user.cash < totalCost) {
+        Alert.alert('Insufficient Funds', `You need $${totalCost.toFixed(2)} to buy ${amount} shares of ${selectedRealEstate.symbol}`);
+        return;
+      }
+      // Deduct cash and award XP for making investment
+      updateCoinsAndXp(10, -totalCost);
+      
+      // Update the user's portfolio real estate value
+      const newRealEstateValue = user.portfolio.realEstateValue + totalCost;
+      user.portfolio.updateRealEstateValue(newRealEstateValue);
+      
+      Alert.alert('Success!', `Bought ${amount} shares of ${selectedRealEstate.symbol} for $${totalCost.toFixed(2)}`, [
+        { text: 'OK', onPress: () => setShowRealEstateModal(false) }
+      ]);
+    } else {
+      // For selling, we'll assume they have the shares (simplified)
+      const sellValue = totalCost * 0.98; // 2% trading fee
+      updateCoinsAndXp(5, sellValue);
+      
+      // Update the user's portfolio real estate value (reduce by sell amount)
+      const newRealEstateValue = Math.max(0, user.portfolio.realEstateValue - totalCost);
+      user.portfolio.updateRealEstateValue(newRealEstateValue);
+      
+      Alert.alert('Success!', `Sold ${amount} shares of ${selectedRealEstate.symbol} for $${sellValue.toFixed(2)}`, [
+        { text: 'OK', onPress: () => setShowRealEstateModal(false) }
+      ]);
+    }
+
+    setRealEstateTradeAmount('');
+  };
+
+  // ETF trading handlers
+  const handleETFSelect = (etf: typeof fakeETFs[0]) => {
+    setSelectedETF(etf);
+    setShowETFModal(true);
+  };
+
+  const handleETFTrade = () => {
+    if (!selectedETF || !etfTradeAmount || !user) {
+      Alert.alert('Error', 'Please enter a valid amount');
+      return;
+    }
+
+    const amount = parseFloat(etfTradeAmount);
+    const totalCost = amount * selectedETF.price;
+
+    if (etfTradeType === 'buy') {
+      if (user.cash < totalCost) {
+        Alert.alert('Insufficient Funds', `You need $${totalCost.toFixed(2)} to buy ${amount} shares of ${selectedETF.symbol}`);
+        return;
+      }
+      // Deduct cash and award XP for making investment
+      updateCoinsAndXp(10, -totalCost);
+      
+      // Update the user's portfolio ETF value
+      const newETFValue = user.portfolio.etfsValue + totalCost;
+      user.portfolio.updateEtfsValue(newETFValue);
+      
+      Alert.alert('Success!', `Bought ${amount} shares of ${selectedETF.symbol} for $${totalCost.toFixed(2)}`, [
+        { text: 'OK', onPress: () => setShowETFModal(false) }
+      ]);
+    } else {
+      // For selling, we'll assume they have the shares (simplified)
+      const sellValue = totalCost * 0.98; // 2% trading fee
+      updateCoinsAndXp(5, sellValue);
+      
+      // Update the user's portfolio ETF value (reduce by sell amount)
+      const newETFValue = Math.max(0, user.portfolio.etfsValue - totalCost);
+      user.portfolio.updateEtfsValue(newETFValue);
+      
+      Alert.alert('Success!', `Sold ${amount} shares of ${selectedETF.symbol} for $${sellValue.toFixed(2)}`, [
+        { text: 'OK', onPress: () => setShowETFModal(false) }
+      ]);
+    }
+
+    setETFTradeAmount('');
+  };
+
   // Achievements data
   const achievements = [
     {
@@ -417,6 +541,8 @@ export default function PortfolioScreen(): React.JSX.Element {
         <PortfolioScreenBreakdown 
           portfolioBreakdown={portfolioBreakdown}
           setShowStockModal={setShowStockModal}
+          setShowRealEstateModal={setShowRealEstateModal}
+          setShowETFModal={setShowETFModal}
         />
 
         {/* Interactive Graphs Section */}
@@ -449,22 +575,42 @@ export default function PortfolioScreen(): React.JSX.Element {
         showAchievements={showAchievements}
         showMarketEvent={showMarketEvent}
         showStockModal={showStockModal}
+        showRealEstateModal={showRealEstateModal}
+        showETFModal={showETFModal}
         setShowActionSheet={setShowActionSheet}
         setShowAchievements={setShowAchievements}
         setShowMarketEvent={setShowMarketEvent}
         setShowStockModal={setShowStockModal}
+        setShowRealEstateModal={setShowRealEstateModal}
+        setShowETFModal={setShowETFModal}
         achievements={achievements}
         currentEvent={currentEvent}
         portfolioActions={portfolioActions}
         fakeStocks={fakeStocks}
+        fakeRealEstate={fakeRealEstate}
+        fakeETFs={fakeETFs}
         user={user}
         selectedStock={selectedStock}
         tradeType={tradeType}
         tradeAmount={tradeAmount}
         setTradeType={setTradeType}
         setTradeAmount={setTradeAmount}
+        selectedRealEstate={selectedRealEstate}
+        realEstateTradeType={realEstateTradeType}
+        realEstateTradeAmount={realEstateTradeAmount}
+        setRealEstateTradeType={setRealEstateTradeType}
+        setRealEstateTradeAmount={setRealEstateTradeAmount}
+        selectedETF={selectedETF}
+        etfTradeType={etfTradeType}
+        etfTradeAmount={etfTradeAmount}
+        setETFTradeType={setETFTradeType}
+        setETFTradeAmount={setETFTradeAmount}
         handleStockSelect={handleStockSelect}
         handleTrade={handleTrade}
+        handleRealEstateSelect={handleRealEstateSelect}
+        handleRealEstateTrade={handleRealEstateTrade}
+        handleETFSelect={handleETFSelect}
+        handleETFTrade={handleETFTrade}
       />
     </SafeAreaView>
   );
