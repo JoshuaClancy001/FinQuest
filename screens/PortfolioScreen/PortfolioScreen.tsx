@@ -36,6 +36,12 @@ export default function PortfolioScreen(): React.JSX.Element {
   const [etfTradeType, setETFTradeType] = useState<'buy' | 'sell'>('buy');
   const [etfTradeAmount, setETFTradeAmount] = useState('');
 
+  // Crypto modal states
+  const [showCryptoModal, setShowCryptoModal] = useState(false);
+  const [selectedCrypto, setSelectedCrypto] = useState<typeof fakeCrypto[0] | null>(null);
+  const [cryptoTradeType, setCryptoTradeType] = useState<'buy' | 'sell'>('buy');
+  const [cryptoTradeAmount, setCryptoTradeAmount] = useState('');
+
   // Mock stock data for trading
   const fakeStocks = [
     { symbol: 'NIMB', name: 'Nimbus Innovations', price: 45.32, change: 2.4 },
@@ -61,6 +67,15 @@ export default function PortfolioScreen(): React.JSX.Element {
     { symbol: 'VTI', name: 'Vanguard Total Stock Market', price: 243.67, change: 0.95, type: 'Total Stock Market', expenseRatio: 0.03 },
     { symbol: 'VXUS', name: 'Vanguard Total International', price: 67.89, change: -1.45, type: 'International', expenseRatio: 0.08 },
     { symbol: 'BND', name: 'Vanguard Total Bond Market', price: 72.34, change: 0.12, type: 'Total Bond Market', expenseRatio: 0.03 },
+  ];
+
+  // Mock crypto data for trading
+  const fakeCrypto = [
+    { symbol: 'BTC', name: 'Bitcoin', price: 43250.67, change: -2.45, type: 'Store of Value', marketCap: 846.5 },
+    { symbol: 'ETH', name: 'Ethereum', price: 2678.34, change: -4.12, type: 'Smart Contract Platform', marketCap: 321.8 },
+    { symbol: 'ADA', name: 'Cardano', price: 0.89, change: 1.67, type: 'Proof of Stake', marketCap: 29.4 },
+    { symbol: 'SOL', name: 'Solana', price: 134.56, change: -6.78, type: 'High Performance', marketCap: 58.9 },
+    { symbol: 'DOT', name: 'Polkadot', price: 12.45, change: 2.34, type: 'Interoperability', marketCap: 15.2 },
   ];
 
   // Debug: Log the current user portfolio values
@@ -380,6 +395,53 @@ export default function PortfolioScreen(): React.JSX.Element {
     setETFTradeAmount('');
   };
 
+  // Crypto trading handlers
+  const handleCryptoSelect = (crypto: typeof fakeCrypto[0]) => {
+    setSelectedCrypto(crypto);
+    setShowCryptoModal(true);
+  };
+
+  const handleCryptoTrade = () => {
+    if (!selectedCrypto || !cryptoTradeAmount || !user) {
+      Alert.alert('Error', 'Please enter a valid amount');
+      return;
+    }
+
+    const amount = parseFloat(cryptoTradeAmount);
+    const totalCost = amount * selectedCrypto.price;
+
+    if (cryptoTradeType === 'buy') {
+      if (user.cash < totalCost) {
+        Alert.alert('Insufficient Funds', `You need $${totalCost.toFixed(2)} to buy ${amount} ${selectedCrypto.symbol}`);
+        return;
+      }
+      // Deduct cash and award XP for making investment
+      updateCoinsAndXp(15, -totalCost); // Higher XP for crypto (more risky)
+      
+      // Update the user's portfolio crypto value
+      const newCryptoValue = user.portfolio.cryptoValue + totalCost;
+      user.portfolio.updateCryptoValue(newCryptoValue);
+      
+      Alert.alert('Success!', `Bought ${amount} ${selectedCrypto.symbol} for $${totalCost.toFixed(2)}`, [
+        { text: 'OK', onPress: () => setShowCryptoModal(false) }
+      ]);
+    } else {
+      // For selling, we'll assume they have the crypto (simplified)
+      const sellValue = totalCost * 0.975; // 2.5% trading fee (higher for crypto)
+      updateCoinsAndXp(8, sellValue);
+      
+      // Update the user's portfolio crypto value (reduce by sell amount)
+      const newCryptoValue = Math.max(0, user.portfolio.cryptoValue - totalCost);
+      user.portfolio.updateCryptoValue(newCryptoValue);
+      
+      Alert.alert('Success!', `Sold ${amount} ${selectedCrypto.symbol} for $${sellValue.toFixed(2)}`, [
+        { text: 'OK', onPress: () => setShowCryptoModal(false) }
+      ]);
+    }
+
+    setCryptoTradeAmount('');
+  };
+
   // Achievements data
   const achievements = [
     {
@@ -543,6 +605,7 @@ export default function PortfolioScreen(): React.JSX.Element {
           setShowStockModal={setShowStockModal}
           setShowRealEstateModal={setShowRealEstateModal}
           setShowETFModal={setShowETFModal}
+          setShowCryptoModal={setShowCryptoModal}
         />
 
         {/* Interactive Graphs Section */}
@@ -577,18 +640,21 @@ export default function PortfolioScreen(): React.JSX.Element {
         showStockModal={showStockModal}
         showRealEstateModal={showRealEstateModal}
         showETFModal={showETFModal}
+        showCryptoModal={showCryptoModal}
         setShowActionSheet={setShowActionSheet}
         setShowAchievements={setShowAchievements}
         setShowMarketEvent={setShowMarketEvent}
         setShowStockModal={setShowStockModal}
         setShowRealEstateModal={setShowRealEstateModal}
         setShowETFModal={setShowETFModal}
+        setShowCryptoModal={setShowCryptoModal}
         achievements={achievements}
         currentEvent={currentEvent}
         portfolioActions={portfolioActions}
         fakeStocks={fakeStocks}
         fakeRealEstate={fakeRealEstate}
         fakeETFs={fakeETFs}
+        fakeCrypto={fakeCrypto}
         user={user}
         selectedStock={selectedStock}
         tradeType={tradeType}
@@ -605,12 +671,19 @@ export default function PortfolioScreen(): React.JSX.Element {
         etfTradeAmount={etfTradeAmount}
         setETFTradeType={setETFTradeType}
         setETFTradeAmount={setETFTradeAmount}
+        selectedCrypto={selectedCrypto}
+        cryptoTradeType={cryptoTradeType}
+        cryptoTradeAmount={cryptoTradeAmount}
+        setCryptoTradeType={setCryptoTradeType}
+        setCryptoTradeAmount={setCryptoTradeAmount}
         handleStockSelect={handleStockSelect}
         handleTrade={handleTrade}
         handleRealEstateSelect={handleRealEstateSelect}
         handleRealEstateTrade={handleRealEstateTrade}
         handleETFSelect={handleETFSelect}
         handleETFTrade={handleETFTrade}
+        handleCryptoSelect={handleCryptoSelect}
+        handleCryptoTrade={handleCryptoTrade}
       />
     </SafeAreaView>
   );

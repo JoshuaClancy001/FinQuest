@@ -59,6 +59,15 @@ interface ETF {
   expenseRatio: number;
 }
 
+interface Crypto {
+  symbol: string;
+  name: string;
+  price: number;
+  change: number;
+  type: string;
+  marketCap: number;
+}
+
 interface User {
   cash: number;
 }
@@ -71,6 +80,7 @@ interface Props {
   showStockModal: boolean;
   showRealEstateModal: boolean;
   showETFModal: boolean;
+  showCryptoModal: boolean;
   
   // Modal state setters
   setShowActionSheet: (show: boolean) => void;
@@ -79,6 +89,7 @@ interface Props {
   setShowStockModal: (show: boolean) => void;
   setShowRealEstateModal: (show: boolean) => void;
   setShowETFModal: (show: boolean) => void;
+  setShowCryptoModal: (show: boolean) => void;
   
   // Data
   achievements: Achievement[];
@@ -87,6 +98,7 @@ interface Props {
   fakeStocks: Stock[];
   fakeRealEstate: RealEstate[];
   fakeETFs: ETF[];
+  fakeCrypto: Crypto[];
   user: User | null;
   
   // Stock trading states
@@ -109,6 +121,13 @@ interface Props {
   etfTradeAmount: string;
   setETFTradeType: (type: 'buy' | 'sell') => void;
   setETFTradeAmount: (amount: string) => void;
+
+  // Crypto trading states
+  selectedCrypto: Crypto | null;
+  cryptoTradeType: 'buy' | 'sell';
+  cryptoTradeAmount: string;
+  setCryptoTradeType: (type: 'buy' | 'sell') => void;
+  setCryptoTradeAmount: (amount: string) => void;
   
   // Handlers
   handleStockSelect: (stock: Stock) => void;
@@ -117,6 +136,8 @@ interface Props {
   handleRealEstateTrade: () => void;
   handleETFSelect: (etf: ETF) => void;
   handleETFTrade: () => void;
+  handleCryptoSelect: (crypto: Crypto) => void;
+  handleCryptoTrade: () => void;
 }
 
 export default function PortfolioScreenModals({
@@ -126,18 +147,21 @@ export default function PortfolioScreenModals({
   showStockModal,
   showRealEstateModal,
   showETFModal,
+  showCryptoModal,
   setShowActionSheet,
   setShowAchievements,
   setShowMarketEvent,
   setShowStockModal,
   setShowRealEstateModal,
   setShowETFModal,
+  setShowCryptoModal,
   achievements,
   currentEvent,
   portfolioActions,
   fakeStocks,
   fakeRealEstate,
   fakeETFs,
+  fakeCrypto,
   user,
   selectedStock,
   tradeType,
@@ -154,12 +178,19 @@ export default function PortfolioScreenModals({
   etfTradeAmount,
   setETFTradeType,
   setETFTradeAmount,
+  selectedCrypto,
+  cryptoTradeType,
+  cryptoTradeAmount,
+  setCryptoTradeType,
+  setCryptoTradeAmount,
   handleStockSelect,
   handleTrade,
   handleRealEstateSelect,
   handleRealEstateTrade,
   handleETFSelect,
-  handleETFTrade
+  handleETFTrade,
+  handleCryptoSelect,
+  handleCryptoTrade
 }: Props): React.JSX.Element {
   return (
     <>
@@ -653,6 +684,113 @@ export default function PortfolioScreenModals({
                 >
                   <Text style={styles.tradeButtonText}>
                     {etfTradeType === 'buy' ? 'Buy' : 'Sell'} Shares
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Crypto Trading Modal */}
+      <Modal
+        visible={showCryptoModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowCryptoModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Crypto Trading</Text>
+              <TouchableOpacity onPress={() => setShowCryptoModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.tradingToggle}>
+              <TouchableOpacity
+                style={[styles.toggleButton, cryptoTradeType === 'buy' && styles.toggleButtonActive]}
+                onPress={() => setCryptoTradeType('buy')}
+              >
+                <Text style={[styles.toggleText, cryptoTradeType === 'buy' && styles.toggleTextActive]}>
+                  Buy
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.toggleButton, cryptoTradeType === 'sell' && styles.toggleButtonActive]}
+                onPress={() => setCryptoTradeType('sell')}
+              >
+                <Text style={[styles.toggleText, cryptoTradeType === 'sell' && styles.toggleTextActive]}>
+                  Sell
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.cashBalance}>Cash: ${user?.cash.toLocaleString()}</Text>
+
+            <ScrollView style={styles.stocksList}>
+              {fakeCrypto.map((crypto) => (
+                <TouchableOpacity
+                  key={crypto.symbol}
+                  style={[
+                    styles.stockItem,
+                    selectedCrypto?.symbol === crypto.symbol && styles.stockItemSelected
+                  ]}
+                  onPress={() => handleCryptoSelect(crypto)}
+                >
+                  <View style={styles.stockInfo}>
+                    <Text style={styles.stockSymbol}>{crypto.symbol}</Text>
+                    <Text style={styles.stockName}>{crypto.name}</Text>
+                    <Text style={styles.stockName}>{crypto.type}</Text>
+                  </View>
+                  <View style={styles.stockPriceContainer}>
+                    <Text style={styles.stockPrice}>${crypto.price.toLocaleString()}</Text>
+                    <Text style={[
+                      styles.stockChange,
+                      { color: crypto.change >= 0 ? '#34C759' : '#FF3B30' }
+                    ]}>
+                      {crypto.change >= 0 ? '+' : ''}{crypto.change.toFixed(2)}%
+                    </Text>
+                    <Text style={styles.stockChange}>Market Cap: ${crypto.marketCap}B</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            {selectedCrypto && (
+              <View style={styles.tradeForm}>
+                <Text style={styles.selectedStockText}>
+                  {cryptoTradeType === 'buy' ? 'Buying' : 'Selling'} {selectedCrypto.symbol}
+                </Text>
+                <Text style={styles.stockPriceText}>
+                  Price: ${selectedCrypto.price.toLocaleString()}
+                </Text>
+                
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Amount:</Text>
+                  <TextInput
+                    style={styles.shareInput}
+                    value={cryptoTradeAmount}
+                    onChangeText={setCryptoTradeAmount}
+                    placeholder="0"
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <Text style={styles.totalCost}>
+                  Total: ${(parseFloat(cryptoTradeAmount) * selectedCrypto.price || 0).toLocaleString()}
+                </Text>
+
+                <TouchableOpacity
+                  style={[
+                    styles.tradeButton,
+                    { backgroundColor: cryptoTradeType === 'buy' ? '#34C759' : '#FF3B30' }
+                  ]}
+                  onPress={handleCryptoTrade}
+                >
+                  <Text style={styles.tradeButtonText}>
+                    {cryptoTradeType === 'buy' ? 'Buy' : 'Sell'} {selectedCrypto.symbol}
                   </Text>
                 </TouchableOpacity>
               </View>
